@@ -32,7 +32,8 @@ enduser_setup.start(
   print -- Lua print function can serve as the debug callback
 );
 
-tmr.alarm(1,2000,1,function()
+local mytimer = tmr.create()
+mytimer:register(2000, tmr.ALARM_AUTO, function ()    
     if lighton==0 then
         lighton=1
         gpio.write(pin,gpio.HIGH)
@@ -41,3 +42,4 @@ tmr.alarm(1,2000,1,function()
          gpio.write(pin,gpio.LOW)
     end
 end)
+mytimer:start()
