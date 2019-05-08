@@ -40,7 +40,7 @@ PostOnGpio
 ## Software
 
 [CH341/CH340 driver](https://sparks.gogo.co.nz/ch340.html)
-[NodeMCU-pyFlasher](https://github.com/marcelstoer/nodemcu-pyflasher/releases)
+[NodeMCU-flasher](https://github.com/nodemcu/nodemcu-flasher/tree/master/Win64/Release)
 
 ## Programming Firmware to the board
 
@@ -51,7 +51,7 @@ Using a linux system (oracle VM) build the [nodeMCU Firmware](https://github.com
 
 Copy the bin files from /bin/ folder.
 
-Open NodeMCU-pyFlasher and select 'QIO' flash mode. While holding down the button we installed on the ESP8266 insert the device into your computer. Use Flash NodeMCU to program the device.
+Open NodeMCU-Flasher and select 'QIO' flash mode. While holding down the button we installed on the ESP8266 insert the device into your computer. Use Flash NodeMCU to program the device.
 
 ## Putting code on the board
 
