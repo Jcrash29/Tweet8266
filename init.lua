@@ -1,10 +1,14 @@
 require("tweet");
 
-print("HEllO world")
-
-lighton=0
-pin=4
-gpio.mode(pin,gpio.OUTPUT)
+MAIN_LOOP_DELAY = 5
+Count = 0
+LED_PIN=4
+SWITCH_PIN = 3
+gpio.mode(LED_PIN,gpio.OUTPUT)
+gpio.mode(SWITCH_PIN,gpio.INT)
+LEDDelay = 2000
+LEDState = true
+loopSinceStateChange = 0
 
 enduser_setup.start(
   function()
@@ -19,16 +23,46 @@ enduser_setup.start(
   end
 );
 
-print("GOT HERE");
+local function switchTrig(level, when)
+    print("Switch went " .. level)
+    pinState = level
+end
 
-local mytimer = tmr.create()
-mytimer:register(2000, tmr.ALARM_AUTO, function ()    
-    if lighton==0 then
-        lighton=1
-        gpio.write(pin,gpio.HIGH)
+gpio.trig(SWITCH_PIN, "both", switchTrig)
+
+
+local mainLoop = tmr.create()
+mainLoop:register(MAIN_LOOP_DELAY, tmr.ALARM_AUTO, function ()
+    if pinState==1 then --deafult pinState
+        LEDDelay =2000
+
+        -- was the button held for more than 50 but less than
+        if loopSinceStateChange*MAIN_LOOP_DELAY > 50 and loopSinceStateChange*MAIN_LOOP_DELAY < 4900 then
+        
+            sendTweet(default_message)
+        end
+        loopSinceStateChange = 0
     else
-        lighton=0
-         gpio.write(pin,gpio.LOW)
+        loopSinceStateChange = loopSinceStateChange+1
+
+        if(loopSinceStateChange*MAIN_LOOP_DELAY) > 5000 then
+            LEDDelay=300
+        end
+        
+    end
+    prevPinState = pinState
+
+    -- Manage LED's
+    Count = Count+1
+    timePassed  = Count*MAIN_LOOP_DELAY
+    if timePassed > LEDDelay then
+        if LEDState then
+            gpio.write(LED_PIN,gpio.HIGH)
+        else
+            gpio.write(LED_PIN,gpio.LOW)        
+        end
+        LEDState = not LEDState
+        Count = 0
     end
 end)
-mytimer:start()
+mainLoop:start()

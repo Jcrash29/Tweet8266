@@ -57,3 +57,7 @@ Open NodeMCU-Flasher and select 'QIO' flash mode. While holding down the button 
 
 Install [ESPlorer](https://esp8266.ru/esplorer/#download) NOTE Requires JAVA (the page has a link)
 
+## Connecting to twitter
+
+We are using [ThingTweet](https://www.mathworks.com/help/thingspeak/thingtweet-app.html) to post messages use this to get your API key.
+
