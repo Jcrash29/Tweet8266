@@ -19,11 +19,11 @@ function file_exists(name)
 end
 --End Helper Function
 
+sntp.sync(nil, nil, nil, 1)  
 
 
 if file_exists('eus_params.lua') then
     dofile('eus_params.lua')
-    print("Our previous data is still stored")
     wifi.setmode(wifi.STATION)
     station_cfg={}
     station_cfg.ssid=wifi_ssid
@@ -34,15 +34,16 @@ if file_exists('eus_params.lua') then
     setAPIKey(twitter_key)
     tweetReady = true
 else
-    print("FML We're doing this again")
     enduser_setup.start(
       function()
         print("Connected to wifi as:" .. wifi.sta.getip())
+        sntp.sync(nil, nil, nil, 1)  
         dofile('eus_params.lua')
         print("Twitter Key: " .. twitter_key)
         setAPIKey(twitter_key)
         sendTweet("Welcome to Tweet8266 bot")
         tweetReady = true
+        
       end,
       function(err, str)
         print("enduser_setup: Err #" .. err .. ": " .. str)
@@ -50,6 +51,7 @@ else
     );
 end
 
+-- Main loop for running our SM
 local mainLoop = tmr.create()
 mainLoop:register(MAIN_LOOP_DELAY, tmr.ALARM_AUTO, function ()
     pinState = gpio.read(SWITCH_PIN)

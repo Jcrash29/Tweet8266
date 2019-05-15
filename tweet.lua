@@ -1,7 +1,7 @@
 -- Origional Author: 2015 ok1cdj
 
 thingtweetAPIKey = ""
-
+firstTime = true
 function urlencode(str)
    if (str) then
       str = string.gsub (str, "\n", "\r\n")
@@ -15,13 +15,9 @@ end
 -- Unable to post the same tweet twice. Add some randomness to 
 -- allow it to post multiple messages of the same text
 function addRandomness(str)
-    if sntp.sync(nil, nil, nil, 1) then
-        tm = rtctime.epoch2cal(rtctime.get())
-        timeDate = string.format("%04d/%02d/%02d %02d:%02d:%02d", tm["year"], tm["mon"], tm["day"], tm["hour"], tm["min"], tm["sec"])
-        return str .. timeDate
-    else
-        return str .. math.random(0,1024)
-    end
+    tm = rtctime.epoch2cal(rtctime.get())
+    timeDate = string.format(" %04d/%02d/%02d %02d:%02d:%02d", tm["year"], tm["mon"], tm["day"], tm["hour"], tm["min"], tm["sec"])
+    return str .. timeDate
 end
 
 function sendTweet(str)
