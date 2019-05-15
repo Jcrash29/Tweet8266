@@ -3,43 +3,70 @@ require("tweet");
 MAIN_LOOP_DELAY = 5
 Count = 0
 LED_PIN=4
+pinState=1
 SWITCH_PIN = 3
 gpio.mode(LED_PIN,gpio.OUTPUT)
 gpio.mode(SWITCH_PIN,gpio.INT)
 LEDDelay = 2000
 LEDState = true
 loopSinceStateChange = 0
+tweetReady = false
 
-enduser_setup.start(
-  function()
-    print("Connected to wifi as:" .. wifi.sta.getip())
-    dofile('eus_params.lua')
-    print("Twitter Key: " .. twitter_key)
-    setAPIKey(twitter_key)
-    sendTweet("Welcome to Tweet8266 bot")
-  end,
-  function(err, str)
-    print("enduser_setup: Err #" .. err .. ": " .. str)
-  end
-);
-
-local function switchTrig(level, when)
-    print("Switch went " .. level)
-    pinState = level
+-- Helper Function
+function file_exists(name)
+   local f=file.open(name,"r")
+   if f~=nil then file.close(f) return true else return false end
 end
+--End Helper Function
 
-gpio.trig(SWITCH_PIN, "both", switchTrig)
 
+
+if file_exists('eus_params.lua') then
+    dofile('eus_params.lua')
+    print("Our previous data is still stored")
+    wifi.setmode(wifi.STATION)
+    station_cfg={}
+    station_cfg.ssid=wifi_ssid
+    station_cfg.pwd=wifi_password
+    station_cfg.save=true
+    wifi.sta.config(station_cfg) 
+    wifi.sta.connect()
+    setAPIKey(twitter_key)
+    tweetReady = true
+else
+    print("FML We're doing this again")
+    enduser_setup.start(
+      function()
+        print("Connected to wifi as:" .. wifi.sta.getip())
+        dofile('eus_params.lua')
+        print("Twitter Key: " .. twitter_key)
+        setAPIKey(twitter_key)
+        sendTweet("Welcome to Tweet8266 bot")
+        tweetReady = true
+      end,
+      function(err, str)
+        print("enduser_setup: Err #" .. err .. ": " .. str)
+      end
+    );
+end
 
 local mainLoop = tmr.create()
 mainLoop:register(MAIN_LOOP_DELAY, tmr.ALARM_AUTO, function ()
+    pinState = gpio.read(SWITCH_PIN)
     if pinState==1 then --deafult pinState
         LEDDelay =2000
 
         -- was the button held for more than 50 but less than
         if loopSinceStateChange*MAIN_LOOP_DELAY > 50 and loopSinceStateChange*MAIN_LOOP_DELAY < 4900 then
-        
-            sendTweet(default_message)
+            if tweetReady then
+                sendTweet(default_message)
+                print("DID A THING");
+            end
+        end
+        if loopSinceStateChange*MAIN_LOOP_DELAY > 5000 then
+            wifi.sta.clearconfig()
+            node.restart()
+            file.remove('eus_params.lua')
         end
         loopSinceStateChange = 0
     else
@@ -66,3 +93,6 @@ mainLoop:register(MAIN_LOOP_DELAY, tmr.ALARM_AUTO, function ()
     end
 end)
 mainLoop:start()
+
+
+
